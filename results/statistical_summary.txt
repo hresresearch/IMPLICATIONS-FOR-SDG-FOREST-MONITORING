@@ -8,7 +8,7 @@ Dep. Variable:               log_loss   R-squared:                       0.977
 Model:                            OLS   Adj. R-squared:                  0.973
 Method:                 Least Squares   F-statistic:                     276.9
 Date:                Wed, 10 Dec 2025   Prob (F-statistic):           1.11e-63
-Time:                        14:55:27   Log-Likelihood:               -0.61547
+Time:                        15:27:59   Log-Likelihood:               -0.61547
 No. Observations:                  99   AIC:                             29.23
 Df Residuals:                      85   BIC:                             65.56
 Df Model:                          13                                         
@@ -69,7 +69,7 @@ Dep. Variable:               log_loss   R-squared:                       0.977
 Model:                            OLS   Adj. R-squared:                  0.974
 Method:                 Least Squares   F-statistic:                     301.7
 Date:                Wed, 10 Dec 2025   Prob (F-statistic):           8.04e-65
-Time:                        14:55:27   Log-Likelihood:               -0.91608
+Time:                        15:27:59   Log-Likelihood:               -0.91608
 No. Observations:                  99   AIC:                             27.83
 Df Residuals:                      86   BIC:                             61.57
 Df Model:                          12                                         

@@ -189,6 +189,17 @@ def write_tables(tables: dict[str, pd.DataFrame]) -> None:
         )
         interp.to_excel(writer, sheet_name="Table5_interp_check", index=False)
 
+        # Appendix Table A1: Discrepancy ratios for selected years (wide format)
+        snapshot_wide = tables["snapshot"].pivot(
+            index="iso3", columns="year", values="discrepancy_ratio"
+        ).reset_index()
+        snapshot_wide = snapshot_wide.rename(columns={"iso3": "Country (ISO3)"})
+        snapshot_wide.to_excel(writer, sheet_name="TableA1_discrepancy_ratios", index=False)
+
+        # Appendix Table A2: Fire–loss correlation diagnostics sorted by Pearson r
+        fire_corr_sorted = fire_corr.sort_values("Pearson correlation (Hansen vs VIIRS)", ascending=False).reset_index(drop=True)
+        fire_corr_sorted.to_excel(writer, sheet_name="TableA2_fire_loss_corr_sorted", index=False)
+
 
 def plot_figures(df: pd.DataFrame) -> None:
     # Distinct, non-pastel palette; no purple.
