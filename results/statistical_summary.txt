@@ -1,0 +1,101 @@
+Scientific Validity Check: Panel Regression (Fixed Effects)
+=========================================================
+
+Model 1: Full (log_loss ~ log_fire + z_agri + log_gdp + FixedEffects)
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:               log_loss   R-squared:                       0.977
+Model:                            OLS   Adj. R-squared:                  0.973
+Method:                 Least Squares   F-statistic:                     276.9
+Date:                Mon, 08 Dec 2025   Prob (F-statistic):           1.11e-63
+Time:                        12:18:37   Log-Likelihood:               -0.61547
+No. Observations:                  99   AIC:                             29.23
+Df Residuals:                      85   BIC:                             65.56
+Df Model:                          13                                         
+Covariance Type:            nonrobust                                         
+==================================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------
+Intercept          3.2811      9.248      0.355      0.724     -15.107      21.669
+C(iso3)[T.BOL]     0.7457      0.809      0.922      0.359      -0.863       2.354
+C(iso3)[T.BRA]     2.5214      0.396      6.362      0.000       1.733       3.309
+C(iso3)[T.CHL]     1.1051      0.375      2.948      0.004       0.360       1.850
+C(iso3)[T.COL]     0.5408      0.419      1.292      0.200      -0.291       1.373
+C(iso3)[T.ECU]    -0.8329      0.574     -1.450      0.151      -1.975       0.309
+C(iso3)[T.GUY]    -2.6173      0.510     -5.134      0.000      -3.631      -1.604
+C(iso3)[T.PER]     0.5045      0.548      0.921      0.360      -0.585       1.594
+C(iso3)[T.PRY]     1.2294      0.444      2.769      0.007       0.347       2.112
+C(iso3)[T.SUR]    -1.7122      0.260     -6.586      0.000      -2.229      -1.195
+C(iso3)[T.URY]    -0.5943      0.428     -1.390      0.168      -1.444       0.256
+log_fire           0.2184      0.045      4.906      0.000       0.130       0.307
+z_agri             0.3395      0.193      1.756      0.083      -0.045       0.724
+log_gdp            0.6653      0.925      0.720      0.474      -1.173       2.504
+==============================================================================
+Omnibus:                        0.310   Durbin-Watson:                   1.956
+Prob(Omnibus):                  0.857   Jarque-Bera (JB):                0.457
+Skew:                           0.110   Prob(JB):                        0.796
+Kurtosis:                       2.750   Cond. No.                     4.67e+03
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 4.67e+03. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+Variance Inflation Factors (Model 1):
+=====================================
+      Variable           VIF
+     Intercept 122631.537369
+C(iso3)[T.BOL]     77.535062
+C(iso3)[T.BRA]     18.611554
+C(iso3)[T.CHL]     16.652832
+C(iso3)[T.COL]     20.753937
+C(iso3)[T.ECU]     39.083748
+C(iso3)[T.GUY]     30.795524
+C(iso3)[T.PER]     35.561309
+C(iso3)[T.PRY]     23.362594
+C(iso3)[T.SUR]      8.009640
+C(iso3)[T.URY]     21.666128
+      log_fire     33.722341
+        z_agri     53.052745
+       log_gdp    134.624615
+
+---------------------------------------------------------
+Model 2: No GDP (log_loss ~ log_fire + z_agri + FixedEffects)
+Hypothesis: Dropping GDP improves z_agri significance due to multicollinearity.
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:               log_loss   R-squared:                       0.977
+Model:                            OLS   Adj. R-squared:                  0.974
+Method:                 Least Squares   F-statistic:                     301.7
+Date:                Mon, 08 Dec 2025   Prob (F-statistic):           8.04e-65
+Time:                        12:18:37   Log-Likelihood:               -0.91608
+No. Observations:                  99   AIC:                             27.83
+Df Residuals:                      86   BIC:                             61.57
+Df Model:                          12                                         
+Covariance Type:            nonrobust                                         
+==================================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------
+Intercept          9.9257      0.507     19.559      0.000       8.917      10.935
+C(iso3)[T.BOL]     0.2018      0.287      0.702      0.484      -0.369       0.773
+C(iso3)[T.BRA]     2.2655      0.174     13.000      0.000       1.919       2.612
+C(iso3)[T.CHL]     1.1075      0.374      2.963      0.004       0.364       1.851
+C(iso3)[T.COL]     0.2542      0.128      1.988      0.050    -1.7e-06       0.508
+C(iso3)[T.ECU]    -1.2158      0.215     -5.643      0.000      -1.644      -0.788
+C(iso3)[T.GUY]    -2.5701      0.504     -5.098      0.000      -3.572      -1.568
+C(iso3)[T.PER]     0.1217      0.130      0.934      0.353      -0.137       0.381
+C(iso3)[T.PRY]     0.9921      0.296      3.347      0.001       0.403       1.581
+C(iso3)[T.SUR]    -1.8081      0.223     -8.121      0.000      -2.251      -1.365
+C(iso3)[T.URY]    -0.4977      0.405     -1.229      0.222      -1.303       0.307
+log_fire           0.2209      0.044      4.994      0.000       0.133       0.309
+z_agri             0.2542      0.152      1.669      0.099      -0.049       0.557
+==============================================================================
+Omnibus:                        0.068   Durbin-Watson:                   1.978
+Prob(Omnibus):                  0.967   Jarque-Bera (JB):                0.098
+Skew:                           0.057   Prob(JB):                        0.952
+Kurtosis:                       2.896   Cond. No.                         305.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.

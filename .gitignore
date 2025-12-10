@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE metadata
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large derived WDPA GeoJSONs are not tracked in Git
+# (must be created locally by running prep_wdpa_v3.py).
+amazon_wdpa_filtered.geojson
+Data/processed/amazon_wdpa_filtered_102033_v3.geojson
