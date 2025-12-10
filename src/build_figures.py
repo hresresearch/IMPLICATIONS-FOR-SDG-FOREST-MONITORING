@@ -130,11 +130,63 @@ def build_summary_tables(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
 def write_tables(tables: dict[str, pd.DataFrame]) -> None:
     excel_path = ROOT / "Tables.xlsx"
     with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
-        tables["summary"].to_excel(writer, sheet_name="Table1_country_summary", index=False)
-        tables["snapshot"].to_excel(writer, sheet_name="Table2_yearly_snapshot", index=False)
-        tables["protected"].to_excel(writer, sheet_name="Table3_protected_share", index=False)
-        tables["fire_corr"].to_excel(writer, sheet_name="Table4_fire_loss_corr", index=False)
-        tables["interp_check"].to_excel(writer, sheet_name="Table5_interp_check", index=False)
+        # Table 1: Country summary (clean, US English headers)
+        summary = tables["summary"].rename(
+            columns={
+                "iso3": "Country (ISO3)",
+                "total_hansen_loss_Mha": "Total Hansen loss 2015–2023 (Mha)",
+                "mean_annual_loss_kha": "Mean annual Hansen loss (kha)",
+                "mean_discrepancy_ratio": "Mean discrepancy ratio (Hansen/FRA)",
+                "mean_protected_share": "Mean protected-loss share",
+                "total_viirs_M": "Total VIIRS fire detections (millions)",
+            }
+        )
+        summary.to_excel(writer, sheet_name="Table1_country_summary", index=False)
+
+        # Table 2: Yearly snapshot for selected years
+        snapshot = tables["snapshot"].rename(
+            columns={
+                "iso3": "Country (ISO3)",
+                "year": "Year",
+                "hansen_loss_kha": "Hansen loss (kha)",
+                "fao_net_change_kha": "FRA net forest area change (kha)",
+                "discrepancy_ratio": "Discrepancy ratio (Hansen/FRA)",
+            }
+        )
+        snapshot.to_excel(writer, sheet_name="Table2_yearly_snapshot", index=False)
+
+        # Table 3: Protected-area loss statistics
+        protected = tables["protected"].rename(
+            columns={
+                "iso3": "Country (ISO3)",
+                "protected_loss_share_mean": "Mean protected-loss share",
+                "protected_loss_share_max": "Maximum protected-loss share",
+                "year_of_max": "Year of maximum protected-loss share",
+            }
+        )
+        protected.to_excel(writer, sheet_name="Table3_protected_share", index=False)
+
+        # Table 4: Fire–loss correlation diagnostics
+        fire_corr = tables["fire_corr"].rename(
+            columns={
+                "iso3": "Country (ISO3)",
+                "pearson_corr": "Pearson correlation (Hansen vs VIIRS)",
+                "slope_ha_per_fire": "Slope (ha per detection)",
+                "intercept": "Intercept (ha)",
+                "p_value": "p-value",
+            }
+        )
+        fire_corr.to_excel(writer, sheet_name="Table4_fire_loss_corr", index=False)
+
+        # Table 5: FRA interpolation diagnostics
+        interp = tables["interp_check"].rename(
+            columns={
+                "iso3": "Country (ISO3)",
+                "max_abs_diff_kha": "Max absolute difference (kha)",
+                "mean_abs_diff_kha": "Mean absolute difference (kha)",
+            }
+        )
+        interp.to_excel(writer, sheet_name="Table5_interp_check", index=False)
 
 
 def plot_figures(df: pd.DataFrame) -> None:
@@ -153,12 +205,32 @@ def plot_figures(df: pd.DataFrame) -> None:
         "#000000",  # Black
     ]
     
-    fig1_data = df.groupby("iso3").agg(total_hansen_loss_Mha=("hansen_loss_ha", lambda x: x.sum() / 1e6)).reset_index()
-    fig1_data = fig1_data.sort_values("total_hansen_loss_Mha", ascending=False)
+    # Annual totals per country to derive cumulative loss and interannual variability
+    annual_loss = (
+        df.groupby(["iso3", "year"])["hansen_loss_ha"]
+        .sum()
+        .reset_index()
+    )
+    fig1_stats = (
+        annual_loss.groupby("iso3")["hansen_loss_ha"]
+        .agg(
+            total_hansen_loss_Mha=lambda x: x.sum() / 1e6,
+            sd_annual_loss_Mha=lambda x: x.std(ddof=1) / 1e6,
+        )
+        .reset_index()
+    )
+    fig1_stats = fig1_stats.sort_values("total_hansen_loss_Mha", ascending=False)
     # Use Royal Blue and Light Blue for contrast (single-color focus).
     for suffix, color in [("a", "#4169e1"), ("b", "#6baed6")]:
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.bar(fig1_data["iso3"], fig1_data["total_hansen_loss_Mha"], color=color)
+        ax.bar(
+            fig1_stats["iso3"],
+            fig1_stats["total_hansen_loss_Mha"],
+            color=color,
+            yerr=fig1_stats["sd_annual_loss_Mha"],
+            ecolor="black",
+            capsize=3,
+        )
         ax.set_ylabel("Total tree cover loss (Mha)")
         ax.set_xlabel("")
         ax.set_title("Gross tree cover loss by country (2015–2023)", pad=12)
@@ -200,10 +272,24 @@ def plot_figures(df: pd.DataFrame) -> None:
         plt.close(fig)
 
     prot_stats = df.dropna(subset=["protected_loss_share"]).copy()
-    prot_stats = prot_stats.groupby("iso3").agg(mean_share=("protected_loss_share", "mean")).reset_index()
+    prot_stats = (
+        prot_stats.groupby("iso3")["protected_loss_share"]
+        .agg(
+            mean_share="mean",
+            sd_share=lambda x: x.std(ddof=1),
+        )
+        .reset_index()
+    )
     prot_stats = prot_stats.sort_values("mean_share", ascending=False)
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.bar(prot_stats["iso3"], prot_stats["mean_share"], color="#4169e1")
+    ax.bar(
+        prot_stats["iso3"],
+        prot_stats["mean_share"],
+        color="#4169e1",
+        yerr=prot_stats["sd_share"],
+        ecolor="black",
+        capsize=3,
+    )
     ax.set_ylabel("Mean protected loss share")
     ax.set_xlabel("ISO3")
     ax.set_title("Share of loss inside protected areas", pad=12)
@@ -330,17 +416,48 @@ def plot_sensitivity_analysis(df: pd.DataFrame) -> None:
     if "threshold" not in df.columns:
         return
 
-    sens = df.groupby(["iso3", "threshold"])["hansen_loss_ha"].sum().reset_index()
-    sens["loss_Mha"] = sens["hansen_loss_ha"] / 1e6
-    
-    # Pivot for plotting
-    pivot = sens.pivot(index="iso3", columns="threshold", values="loss_Mha")
-    
+    # Annual loss by country, year, and threshold to summarize totals and variability
+    annual = (
+        df.groupby(["iso3", "threshold", "year"])["hansen_loss_ha"]
+        .sum()
+        .reset_index()
+    )
+    sens_stats = (
+        annual.groupby(["iso3", "threshold"])["hansen_loss_ha"]
+        .agg(
+            total_loss_Mha=lambda x: x.sum() / 1e6,
+            sd_annual_loss_Mha=lambda x: x.std(ddof=1) / 1e6,
+        )
+        .reset_index()
+    )
+
+    iso_order = sorted(sens_stats["iso3"].unique())
+    thresholds = sorted(sens_stats["threshold"].unique())
+
     fig, ax = plt.subplots(figsize=(10, 6))
     palette = ["#4169e1", "#1b7837", "#c67c2c"]
-    pivot.plot(kind="bar", ax=ax, color=palette[: len(pivot.columns)])
-    ax.set_ylabel("Total Tree Cover Loss (Mha)")
-    ax.set_title("Sensitivity Analysis: Loss by Tree Cover Threshold", pad=12)
+
+    x = np.arange(len(iso_order))
+    width = 0.8 / max(len(thresholds), 1)
+
+    for i, thr in enumerate(thresholds):
+        sub = sens_stats[sens_stats["threshold"] == thr].set_index("iso3").reindex(iso_order)
+        ax.bar(
+            x + i * width - 0.5 * width * (len(thresholds) - 1),
+            sub["total_loss_Mha"],
+            width=width,
+            label=f"{thr}%",
+            color=palette[i % len(palette)],
+            yerr=sub["sd_annual_loss_Mha"],
+            ecolor="black",
+            capsize=3,
+        )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(iso_order)
+    ax.set_ylabel("Total tree cover loss (Mha)")
+    ax.set_title("Sensitivity analysis: Loss by tree cover threshold", pad=12)
+    ax.legend(title="Tree cover threshold")
     ax.grid(axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()
     fig.savefig(FIG_DIR / "figure6_sensitivity_analysis.png", dpi=300)
