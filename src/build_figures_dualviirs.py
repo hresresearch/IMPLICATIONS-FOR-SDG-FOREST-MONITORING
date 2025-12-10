@@ -32,11 +32,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent
-FIG_DIR = ROOT / "Figures"
+PKG_ROOT = ROOT.parent
+FIG_DIR = PKG_ROOT / "results"
 FIG_DIR.mkdir(exist_ok=True)
 
-DATA_ALL = ROOT / "final_paper_dataset_v3_dualviirs_all_thresholds.csv"
-REGIONS = ROOT / "Data/processed/amazon_regions_102033.geojson"
+DATA_ALL = PKG_ROOT / "results/final_paper_dataset_v3_dualviirs_all_thresholds.csv"
+REGIONS = PKG_ROOT / "Data/processed/amazon_regions_102033.geojson"
 
 # Style: Times New Roman, muted scientific palette (no pastels)
 plt.rcParams.update(

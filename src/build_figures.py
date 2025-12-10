@@ -29,12 +29,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent
-FIG_DIR = ROOT / "Figures"
+PKG_ROOT = ROOT.parent
+FIG_DIR = PKG_ROOT / "results"
 FIG_DIR.mkdir(exist_ok=True)
 
-DATA_PATH = ROOT / "final_paper_dataset_v3_dualviirs.csv"
-FRA_RAW = ROOT / "Data/bulk-download_fra_2025/FRA_Years_variables/1a_forestArea_2025_11_27.csv"
-FRA_PCHIP = ROOT / "Data/processed/fao_forest_interpolated_2015_2023_pchip_v2.csv"
+DATA_PATH = PKG_ROOT / "results/final_paper_dataset_v3_dualviirs.csv"
+FRA_RAW = PKG_ROOT / "Data/bulk-download_fra_2025/FRA_Years_variables/1a_forestArea_2025_11_27.csv"
+FRA_PCHIP = PKG_ROOT / "Data/processed/fao_forest_interpolated_2015_2023_pchip_v2.csv"
 
 
 def build_summary_tables(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
@@ -128,7 +129,7 @@ def build_summary_tables(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
 
 def write_tables(tables: dict[str, pd.DataFrame]) -> None:
-    excel_path = ROOT / "Tables.xlsx"
+    excel_path = PKG_ROOT / "results/Tables.xlsx"
     with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
         # Table 1: Country summary (clean, US English headers)
         summary = tables["summary"].rename(

@@ -27,10 +27,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent
-FIG_DIR = ROOT / "Figures"
+PKG_ROOT = ROOT.parent
+FIG_DIR = PKG_ROOT / "results"
 FIG_DIR.mkdir(exist_ok=True)
 
-REGIONS_EQAREA = ROOT / "Data/processed/amazon_regions_102033.geojson"
+REGIONS_EQAREA = PKG_ROOT / "Data/processed/amazon_regions_102033.geojson"
 
 
 def make_conceptual_schematic() -> None:

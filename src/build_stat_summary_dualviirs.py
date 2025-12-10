@@ -22,8 +22,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent
-DATA_ALL = ROOT / "final_paper_dataset_v3_dualviirs_all_thresholds.csv"
-OUT = ROOT / "Figures/statistical_summary.txt"
+PKG_ROOT = ROOT.parent
+DATA_ALL = PKG_ROOT / "results/final_paper_dataset_v3_dualviirs_all_thresholds.csv"
+OUT = PKG_ROOT / "results/statistical_summary_dualviirs.txt"
 
 
 def fit_models(df: pd.DataFrame) -> str:
